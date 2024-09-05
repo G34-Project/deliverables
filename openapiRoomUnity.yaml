@@ -1,0 +1,401 @@
+openapi: 3.0.3
+info:
+  title: RoomUnity - OpenAPI 3.0
+  description: |-
+    Questa e' la documentazione di RoomUnity è un'applicazione progettata per facilitare la gestione della convivenza tra coinquilini. 
+    
+    Le autorizzazioni sono date attraverso i tokenJwt
+
+  version: 1.1.0
+externalDocs:
+  description: Il sito ostato su vercel
+  url: http://google.it
+servers:
+  - url: https://localhost:3000/api
+tags:
+  - name: auth
+    description: Gestione di accesso per gli utenti
+  - name: appartamento
+    description: Gestione stato in Appartamento
+  - name: lista della spesa
+    description: Gestione dei Prodotti nella Lista della spesa
+  - name: bacheca
+    description: Gestione dei Postit in Bacheca
+paths:
+  /bacheca/createPostIt:
+    post:
+      tags:
+        - bacheca
+      summary: Aggiunge Post-it in Bacheca
+      description: " "
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Post-It'
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Errore nell'inserimento del post-it
+      security:
+        - cookieAuth: []   
+  /bacheca/getAllPostIt:
+    get:
+      tags:
+        - bacheca
+      summary: Restituisce Post-It in Bacheca
+      description: " "
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Post-It'
+          
+        '400':
+          description: Impossibile ritornare Bacheca
+      security:
+        - cookieAuth: []    
+  /lista/createProduct:
+    post:
+      tags:
+        - lista della spesa
+      summary: Aggiunge prodotto in lista
+      description: " "
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Prodotto'
+      responses:
+        '200':
+          description: Operazione avvenuta con successo
+        '400':
+          description: Errore nell'inserimento del prodotto
+      security:
+        - cookieAuth: []    
+  /lista/deleteProduct:
+    delete:
+      tags:
+        - lista della spesa
+      summary: Cancella prodotto dalla lista
+      description: Elimina un prodotto dal database utilizzando il suo ID.
+      parameters:
+        - name: productId
+          in: query
+          required: true
+          description: L'ID del prodotto che si desidera eliminare.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Errore nell'eliminare il prodotto
+      security:
+        - cookieAuth: []    
+  /lista/getAllProduct:
+    get:
+      tags:
+        - lista della spesa
+      summary: Restituisce tutti i prodotti in lista
+      description: " "
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Prodotto'
+        '400':
+          description: Impossibile ritornare lista della spesa
+      security:
+        - cookieAuth: []        
+  /lista/updateStatusProduct:
+    put:
+      tags:
+        - lista della spesa
+      summary: Cambia stato del prodotto in lista
+      description: " "
+      parameters:
+        - name: productId
+          in: query
+          required: true
+          description: L'ID del prodotto che si desidera segnare.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+          
+        '400':
+          description: Impossibile cambiare stato prodotto
+      security:
+        - cookieAuth: []  
+  /appartamento/deleteAppartamento:
+    delete:
+      tags:
+        - appartamento
+      summary: Elimina l'appartamento
+      description: "Cancella dal database l'appartmaento in cui è l'utente"
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+          
+        '400':
+          description: Bad Request
+        '404':
+          description: Appartamento gia eliminato
+        '500':
+          description: Errore durante la richiesta al database
+      security:
+        - cookieAuth: []
+        
+  /appartamento/joinAppartamento:
+    post:
+      tags:
+        - appartamento
+      summary: Crea nuovo Appartamento
+      description: " "
+      parameters:
+        - name: nome_appartamento
+          in: query
+          required: true
+          description: il nome dell'appartamento che si vuole creare.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Bad Request
+        '401':
+          description: Autorizzazione richiesta
+        '409':
+          description: Appartamento esiste gia'
+        '500':
+          description: Errore durante la richiesta al database
+          
+      security:
+        - cookieAuth: []
+        
+    put:
+      tags:
+        - appartamento
+      summary: Entra in un Appartamento
+      description: " "
+      parameters:
+        - name: nome_appartamento
+          in: query
+          required: true
+          description: il nome dell'appartamento nel quale si deisdera entrare.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Bad Request
+        '401':
+          description: Autorizzazione richiesta
+        '404':
+          description: Appartamento non trovato
+        '409':
+          description: Utente gia' in un appartamento
+        '500':
+          description: Errore durante la richiesta al database
+        
+      security:
+        - cookieAuth: []
+          
+    delete:
+      tags:
+        - appartamento
+      summary: Esci dall'Appartamento
+      description: " "
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Bad Request
+        '401':
+          description: Autorizzazione richiesta
+        '404':
+          description: Appartamento non esiste
+        '500': 
+          description: Errore durante la richiesta al database
+      
+      security:
+        - cookieAuth: []
+  
+  /auth/login:
+    get:
+      tags:
+        - auth
+      summary: Recupera stato utente
+      description: Ritorna le informazioni necessarie per il frontend adattivo riguardanti l'utente
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Utente'
+        '400':
+          description: Bad Request
+        '401':
+          description: Token non Valido
+        '404':
+          description: Nessuna sessione utente
+          
+      security:
+        - cookieAuth: []
+        
+    post:
+      tags:
+        - auth
+      summary: Effettua il login dell'utente
+      description: Controlla la validità delle credenziali e crea una sessione
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Operazione avvenuta con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Utente'
+        '400':
+          description: Bad Request
+        
+        '404':
+          description: Email utente non trovata
+          
+        '401':
+          description: Credenziali non valide
+          
+        '500':
+          description: Errore durante la richiesta al database
+          
+    delete:
+      tags:
+        - auth
+      summary: Cancella lo stato dell'utente
+      description: Elimina il cookie in cui sono salvate le informazioni dell'utente
+      responses:
+        '200':
+          description: Operazione avvenuta con successo
+        '400':
+          description: Bad Request
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Effettua la registrazione di un nuovo utente
+      description: Salva i dati dell'utente nel database
+      parameters:
+        - name: nome
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operazione avvenuta con successo
+        '400':
+          description: Bad request
+        '409':
+          description: Email o nome utente già registrato
+        '500':
+          description: Errore durante la richiesta al database
+components:
+  schemas:
+  
+    Prodotto:
+      type: object
+      properties:
+        nome_autore:
+          type: string
+          example: "Pino"
+        nome:
+          type: string
+          example: "caffe"
+        quantita:
+          type: number
+          example: 10
+        prezzo:
+          type: number
+          example: 13.60
+        signed:
+          type: boolean
+          example: false
+        productId:
+          type: string
+      
+    Post-It:
+      type: object
+      properties:
+        nome_autore:
+          type: string
+          example: "Carlos"
+        Data:
+          type: object
+          properties:
+            giorno:
+              type: integer
+              example: 15
+            mese: 
+              type: integer
+              example: 8
+            anno:
+              type: integer
+              example: 2023
+        contenuto:
+          type: string
+          example: "Post-it per dirvi che non tornero' a trento prima del 6 Settembre"
+          
+    Utente:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: Carlos
+        cognome:
+          type: string
+          example: Bianchi
+        email:
+          type: string
+          example: carlos@mailmail.com
+          
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: tokenjwt
